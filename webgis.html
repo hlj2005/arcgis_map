@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地理空间数据可视化平台</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+        }
+        #mapView {
+            height: 600px;
+            width: 100%;
+        }
+        #basemapGallery {
+            padding: 10px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.32/"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/ScaleBar",
+            "esri/widgets/Legend",
+            "esri/widgets/Search",
+            "esri/widgets/LayerList",
+            "esri/widgets/BasemapGallery"
+        ], function(Map, MapView, FeatureLayer, ScaleBar, Legend, Search, LayerList, BasemapGallery) {
+
+            // 初始化地图
+            const map = new Map({
+                basemap: "streets-vector"
+            });
+
+            // 创建地图视图
+            const view = new MapView({
+                container: "mapView",
+                map: map,
+                center: [103.5, 36.5], // 中国中心点坐标
+                zoom: 3 // 调整缩放级别以显示中国全貌
+            });
+
+            // 添加ArcGIS Online发布的专题图层
+            const earthquakeLayer = new FeatureLayer({
+                url: "https://www.geosceneonline.cn/server/rest/services/Hosted/八大森林工程_LCR/FeatureServer/0"
+            });
+            map.add(earthquakeLayer);
+
+            // 添加比例尺
+            const scaleBar = new ScaleBar({
+                view: view,
+                unit: "metric"
+            });
+            view.ui.add(scaleBar, "bottom-left");
+
+            // 添加图例
+            const legend = new Legend({
+                view: view,
+                layerInfos: [{ layer: earthquakeLayer, title: "八大森林工程" }]
+            });
+            view.ui.add(legend, "bottom-right");
+
+            // 添加搜索框
+            const search = new Search({
+                view: view
+            });
+            view.ui.add(search, "top-right");
+
+            // 添加图层列表
+            const layerList = new LayerList({
+                view: view
+            });
+            view.ui.add(layerList, "top-right");
+
+            // 添加底图库
+            const basemapGallery = new BasemapGallery({
+                view: view,
+                container: document.createElement("div")
+            });
+            basemapGallery.watch("activeBasemap", (newBasemap) => {
+                if (newBasemap) {
+                    map.basemap = newBasemap;
+                }
+            });
+
+            // 将底图库添加到页面
+            document.getElementById("basemapGallery").appendChild(basemapGallery.container);
+
+        });
+    </script>
+</head>
+<body>
+    <div id="header">地理空间数据可视化平台</div>
+    <div id="mapView"></div>
+    <div id="basemapGallery"></div>
+</body>
+</html>
